@@ -104,6 +104,19 @@
         padding-top: 15px;
         border-top: 1px solid #f1f5f9;
       }
+      .credit-box {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.875rem;
+        color: #aaaaaa;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.25s ease, color 0.25s ease;
+      }
+      .credit-box:hover {
+        color: #ddd;
+      }
       @keyframes pulseHeart {
         0% {
           transform: scale(1);
@@ -120,7 +133,7 @@
   <body>
     <div class="header">
       <img
-        src="logo.png"
+        src="icon.png"
         alt="Map Harvest Logo"
         class="logo-icon"
       />
@@ -144,22 +157,7 @@
         rel="noopener noreferrer"
         style="text-decoration: none"
       >
-        <div
-          style="
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.875rem;
-            color: #aaaaaa;
-            font-weight: 500;
-            cursor: pointer;
-            transition:
-              background-color 0.25s ease,
-              color 0.25s ease;
-          "
-          onmouseover="this.style.color = '#ddd'"
-          onmouseout="this.style.color = '#aaa'"
-        >
+        <div class="credit-box">
           <span>Built with</span>
           <svg
             xmlns="http://www.w3.org/2000/svg"
