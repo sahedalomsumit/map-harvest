@@ -1,6 +1,7 @@
 let scraping = false;
 let scrapedData = [];
 let seenKeys = new Set();
+let lastStatusText = "Ready";
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "START_SCRAPING") {
@@ -10,8 +11,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       seenKeys.clear();
       startHarvest();
     }
+    sendResponse({ success: true });
   } else if (request.action === "STOP_SCRAPING") {
     stopHarvest();
+    sendResponse({ success: true });
+  } else if (request.action === "GET_STATUS") {
+    sendResponse({ scraping: scraping, count: scrapedData.length, text: lastStatusText });
   }
 });
 
@@ -22,35 +27,66 @@ async function startHarvest() {
   
   // Find the scrollable list container
   let feedContainer = getFeedContainer();
-  if (!feedContainer) {
-    updateStatus("Could not find results list.");
-    scraping = false;
-    return;
-  }
-
-  let index = 0;
   
+  // PHASE 1: SCROLL TO LOAD ALL ITEMS
+  updateStatus("Scrolling to load all results...");
+  let previousCount = 0;
+  let noChangeCount = 0;
+  let items = [];
+
   while (scraping) {
-    let items = document.querySelectorAll('a[href*="/maps/place/"]');
+    items = document.querySelectorAll('a[href*="/maps/place/"]');
+    updateStatus(`Scrolling to load all results... (Found ${items.length})`);
     
-    if (index >= items.length) {
-      // Try scrolling to load more
-      let previousCount = items.length;
-      feedContainer.scrollTop = feedContainer.scrollHeight;
-      updateStatus("Loading more results...");
-      await sleep(2000); // Give DOM time to update
-      
-      items = document.querySelectorAll('a[href*="/maps/place/"]');
-      if (items.length === previousCount) {
-        // End of list reached or lazy-load failed
-        break;
-      }
+    if (items.length > 0) {
+      // Scroll the last item into view to trigger lazy loading
+      items[items.length - 1].scrollIntoView({ behavior: 'smooth', block: 'end' });
     }
     
-    let item = items[index];
-    if (!item) break;
+    if (feedContainer) {
+      feedContainer.scrollTop = feedContainer.scrollHeight;
+    }
     
-    // Click the item to load details pane
+    await sleep(2500); // Give DOM and network time to load more
+    
+    let newItems = document.querySelectorAll('a[href*="/maps/place/"]');
+    if (newItems.length === previousCount && newItems.length > 0) {
+      noChangeCount++;
+      
+      // Look for Google Maps' specific end of list text
+      const isEndOfList = Array.from(document.querySelectorAll('span, div')).some(el => 
+        el.innerText && el.innerText.includes("You've reached the end of the list")
+      );
+      
+      if (isEndOfList) {
+        updateStatus("End of list detected.");
+        break;
+      }
+      
+      // Increased from 3 to 20 to wait much longer for slower connections
+      if (noChangeCount >= 20) {
+        // End of list reached
+        break;
+      }
+    } else {
+      noChangeCount = 0;
+    }
+    previousCount = newItems.length;
+  }
+
+  if (!scraping) return;
+
+  items = document.querySelectorAll('a[href*="/maps/place/"]');
+  updateStatus(`Found ${items.length} total results. Starting extraction...`);
+
+  // PHASE 2: EXTRACT DATA
+  for (let i = 0; i < items.length; i++) {
+    if (!scraping) break;
+    
+    let item = items[i];
+    // Scroll the item into view so the user can see the progress on the page
+    item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    await sleep(500); // Wait briefly for the scroll
     item.click();
     await sleep(2500); // Wait for details panel to load
     
@@ -65,7 +101,7 @@ async function startHarvest() {
       
       // Fetch external data if website exists
       if (details.website) {
-        updateStatus(`Fetching website for ${details.company}...`);
+        updateStatus(`Fetching website for ${details.company}... (${i + 1}/${items.length})`);
         try {
           const extra = await new Promise(resolve => {
              chrome.runtime.sendMessage({ action: "FETCH_WEBSITE", url: details.website }, response => resolve(response));
@@ -82,10 +118,8 @@ async function startHarvest() {
       }
       
       scrapedData.push(details);
-      updateStatus(`Scraped ${scrapedData.length} results...`);
+      updateStatus(`Scraped ${scrapedData.length} of ${items.length} results...`);
     }
-    
-    index++;
   }
   
   stopHarvest();
@@ -163,5 +197,8 @@ function extractDetails() {
 }
 
 function updateStatus(text) {
-  chrome.runtime.sendMessage({ action: "UPDATE_PROGRESS", text });
+  lastStatusText = text;
+  chrome.runtime.sendMessage({ action: "UPDATE_PROGRESS", text }).catch(() => {
+    // Ignore error when popup is closed
+  });
 }
