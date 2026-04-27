@@ -32,15 +32,15 @@ async function startHarvest() {
   updateStatus("Scrolling to load all results...");
   let previousCount = 0;
   let noChangeCount = 0;
-  let items = [];
+  let allItems = [];
 
   while (scraping) {
-    items = document.querySelectorAll('a[href*="/maps/place/"]');
-    updateStatus(`Scrolling to load all results... (Found ${items.length})`);
+    allItems = document.querySelectorAll('a[href*="/maps/place/"]');
+    updateStatus(`Scrolling to load all results... (Found ${allItems.length})`);
     
-    if (items.length > 0) {
+    if (allItems.length > 0) {
       // Scroll the last item into view to trigger lazy loading
-      items[items.length - 1].scrollIntoView({ behavior: 'smooth', block: 'end' });
+      allItems[allItems.length - 1].scrollIntoView({ block: 'end' });
     }
     
     if (feedContainer) {
@@ -63,7 +63,7 @@ async function startHarvest() {
         break;
       }
       
-      // Increased from 3 to 20 to wait much longer for slower connections
+      // Wait much longer for slower connections
       if (noChangeCount >= 20) {
         // End of list reached
         break;
@@ -76,23 +76,58 @@ async function startHarvest() {
 
   if (!scraping) return;
 
-  items = document.querySelectorAll('a[href*="/maps/place/"]');
-  updateStatus(`Found ${items.length} total results. Starting extraction...`);
+  allItems = document.querySelectorAll('a[href*="/maps/place/"]');
+  
+  // Deduplicate items based on their href so we don't click the same place twice
+  let items = [];
+  let seenUrls = new Set();
+  
+  for (let i = 0; i < allItems.length; i++) {
+    let el = allItems[i];
+    let url = el.href.split('?')[0]; // Ignore query params for deduplication
+    if (!seenUrls.has(url)) {
+      seenUrls.add(url);
+      items.push(el);
+    }
+  }
+
+  updateStatus(`Found ${items.length} unique results. Starting extraction...`);
 
   // PHASE 2: EXTRACT DATA
+  let lastCompany = "";
+  
   for (let i = 0; i < items.length; i++) {
     if (!scraping) break;
     
     let item = items[i];
-    // Scroll the item into view so the user can see the progress on the page
-    item.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    await sleep(500); // Wait briefly for the scroll
+    
+    // Scroll the item into view without smooth animation to ensure reliable clicking
+    item.scrollIntoView({ block: 'center' });
+    await sleep(300); // Brief pause before click
+    
     item.click();
-    await sleep(2500); // Wait for details panel to load
+    
+    // Wait for the details panel to load by checking if the title has changed from the previous place
+    let loaded = false;
+    for (let wait = 0; wait < 20; wait++) { // Wait up to 5 seconds
+      await sleep(250);
+      const titleEl = document.querySelector('h1.DUwDvf.lfPIob');
+      if (titleEl && titleEl.innerText.trim() && titleEl.innerText.trim() !== lastCompany) {
+        loaded = true;
+        break;
+      }
+    }
+    
+    // Wait an additional moment to let dynamic content (like phone, website, external links) render
+    await sleep(1500); 
     
     if (!scraping) break;
     
     const details = extractDetails();
+    if (details.company) {
+      lastCompany = details.company;
+    }
+    
     const key = details.company + "|" + details.phone;
     
     // Deduplicate by name and phone
