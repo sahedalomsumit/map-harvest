@@ -47,6 +47,10 @@ document.getElementById('stopBtn').addEventListener('click', async () => {
 function updateUI() {
   document.getElementById('startBtn').style.display = isScraping ? 'none' : 'block';
   document.getElementById('stopBtn').style.display = isScraping ? 'block' : 'none';
+  const warningMsg = document.getElementById('warningMsg');
+  if (warningMsg) {
+    warningMsg.style.display = isScraping ? 'block' : 'none';
+  }
 }
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {

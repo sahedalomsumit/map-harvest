@@ -57,3 +57,8 @@ Since this extension is not published on the Chrome Web Store, you'll need to lo
 - **Dynamic DOM**: Google Maps constantly changes its DOM classes. This extension uses multiple fallback selectors and Regex parsing to reliably pull ratings and reviews regardless of locale (e.g., works with Finnish formatting like "4,8" and "Kylpylä").
 - **Missing Data**: If a business lacks an email, social links, or a website, the extension gracefully leaves the column blank without crashing.
 - **CSV Escaping**: All data is properly wrapped in quotes and escaped, so internal commas (like in review scores) won't break the CSV layout.
+
+## 👨‍💻 Author
+
+**Sahed Alom Sumit**
+- Website: [sahedalomsumit.com](https://sahedalomsumit.com)
