@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { width: 250px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding: 15px; margin: 0; background: #fafafa; }
+    h2 { margin-top: 0; font-size: 16px; color: #333; }
+    p { font-size: 13px; color: #666; margin-bottom: 15px; line-height: 1.4; }
+    .status { font-size: 12px; font-weight: bold; margin-bottom: 10px; color: #0066cc; }
+    button { width: 100%; padding: 10px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; margin-bottom: 10px; transition: background 0.2s; }
+    #startBtn { background: #4CAF50; color: white; }
+    #startBtn:hover { background: #45a049; }
+    #stopBtn { background: #f44336; color: white; display: none; }
+    #stopBtn:hover { background: #da190b; }
+    .footer { font-size: 11px; color: #999; text-align: center; margin-top: 15px; }
+  </style>
+</head>
+<body>
+  <h2>Map Harvest</h2>
+  <p>Search Google Maps, then click start to harvest listings.</p>
+  <div class="status" id="status">Ready</div>
+  <button id="startBtn">Start Scraping</button>
+  <button id="stopBtn">Stop & Export</button>
+  <div class="footer">Client-side processing only</div>
+  <script src="popup.js" type="module"></script>
+</body>
+</html>
