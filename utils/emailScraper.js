@@ -6,7 +6,10 @@ export async function scrapeEmailsAndSocials(url) {
     const response = await fetch(url, { signal: controller.signal });
     clearTimeout(timeoutId);
     
-    if (!response.ok) throw new Error("Fetch failed");
+    if (!response.ok) {
+      console.warn(`Fetch returned status ${response.status} for: ${url}`);
+      return { email: "", facebook: "", instagram: "", linkedin: "" };
+    }
     
     const html = await response.text();
     
@@ -29,7 +32,7 @@ export async function scrapeEmailsAndSocials(url) {
       linkedin: inMatch ? inMatch[0] : ""
     };
   } catch (error) {
-    console.error("Scraping failed for:", url, error);
+    console.warn("Scraping failed for:", url, error.message || error);
     return { email: "", facebook: "", instagram: "", linkedin: "" };
   }
 }
