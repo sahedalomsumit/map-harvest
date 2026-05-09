@@ -64,10 +64,4 @@ Since this extension is not published on the Chrome Web Store, you'll need to lo
 
 ## 👨‍💻 Author
 
-**Sahed Alom Sumit**
-
-- Website: [sahedalomsumit.com](https://sahedalomsumit.com)
-
----
-
-Built with ❤️ by [Sahed Alom Sumit](https://github.com/sahedalomsumit)
+- Built with ❤️ by [Sahed Alom Sumit](https://github.com/sahedalomsumit)
