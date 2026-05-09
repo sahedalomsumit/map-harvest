@@ -1,12 +1,29 @@
 let isScraping = false;
 
 document.addEventListener('DOMContentLoaded', async () => {
+  // Set version
+  const manifest = chrome.runtime.getManifest();
+  const versionEl = document.getElementById('version');
+  if (versionEl) {
+    versionEl.innerText = `Version ${manifest.version}`;
+  }
+
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  if (!tab || !tab.url.includes("google.com/maps")) {
-    document.getElementById('status').innerText = "Please open Google Maps.";
+  const isGoogleMaps = tab && /google\.[a-z.]+\/maps/.test(tab.url);
+  if (!isGoogleMaps) {
+    const statusEl = document.getElementById('status');
+    statusEl.innerHTML = 'Please open Google Maps';
+    statusEl.style.cursor = 'pointer';
+    statusEl.onclick = () => window.open('https://www.google.com/maps', '_blank');
+    statusEl.title = 'Click to open Google Maps';
     return;
   }
   
+  const statusEl = document.getElementById('status');
+  statusEl.style.cursor = 'default';
+  statusEl.onclick = null;
+  statusEl.title = '';
+
   // Sync state with content script
   try {
     const response = await chrome.tabs.sendMessage(tab.id, { action: "GET_STATUS" });
@@ -24,7 +41,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 document.getElementById('startBtn').addEventListener('click', async () => {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  if (!tab || !tab.url.includes("google.com/maps")) return;
+  const isGoogleMaps = tab && /google\.[a-z.]+\/maps/.test(tab.url);
+  if (!isGoogleMaps) return;
   
   isScraping = true;
   updateUI();

@@ -65,6 +65,10 @@
         padding: 8px 12px;
         border-radius: 6px;
         text-align: center;
+        transition: all 0.2s ease;
+      }
+      .status:hover {
+        background: #e0f2fe;
       }
       button {
         width: 100%;
@@ -118,7 +122,7 @@
           color 0.25s ease;
       }
       .credit-box:hover {
-        color: #ddd;
+        color: #444;
       }
       @keyframes pulseHeart {
         0% {
@@ -130,6 +134,26 @@
         100% {
           transform: scale(1);
         }
+      }
+      .url-preview {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        background: #ffffff;
+        color: #475569;
+        font-size: 10px;
+        padding: 2px 8px;
+        border-top-right-radius: 4px;
+        border-top: 1px solid #e2e8f0;
+        border-right: 1px solid #e2e8f0;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+        z-index: 1000;
+        font-family: inherit;
+      }
+      .footer a:hover ~ .url-preview {
+        opacity: 1;
       }
     </style>
   </head>
@@ -164,7 +188,7 @@
     <button id="startBtn">Start Scraping</button>
     <button id="stopBtn">Stop & Export</button>
     <div class="footer">
-      Client-side processing only<br /><br />
+      Client-side processing only | <span id="version"></span><br /><br />
       <a
         href="https://sahedalomsumit.com"
         target="_blank"
@@ -198,6 +222,7 @@
           <span style="color: #ff8719; font-weight: 700">Sahed</span>
         </div>
       </a>
+      <div class="url-preview">https://sahedalomsumit.com</div>
     </div>
     <script src="popup.js" type="module"></script>
   </body>

@@ -1,4 +1,4 @@
-export function exportToCsv(data) {
+export function exportToCsv(data, filename) {
   if (!data || !data.length) return;
 
   const headers = [
@@ -40,7 +40,7 @@ export function exportToCsv(data) {
   
   chrome.downloads.download({
     url: dataUrl,
-    filename: `map_harvest_${new Date().getTime()}.csv`,
+    filename: filename || `map_harvest_${new Date().getTime()}.csv`,
     saveAs: true
   });
 }

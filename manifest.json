@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Map Harvest",
-  "version": "1.0",
+  "version": "1.0.0",
   "description": "Scrape Google Maps search results to CSV.",
   "permissions": [
     "activeTab",
@@ -34,7 +34,28 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://www.google.com/maps/*"],
+      "matches": [
+        "https://www.google.com/maps/*",
+        "https://www.google.co.uk/maps/*",
+        "https://www.google.ca/maps/*",
+        "https://www.google.com.au/maps/*",
+        "https://www.google.com.bd/maps/*",
+        "https://www.google.fi/maps/*",
+        "https://www.google.de/maps/*",
+        "https://www.google.fr/maps/*",
+        "https://www.google.es/maps/*",
+        "https://www.google.it/maps/*",
+        "https://www.google.co.in/maps/*",
+        "https://www.google.co.id/maps/*",
+        "https://www.google.com.my/maps/*",
+        "https://www.google.com.ph/maps/*",
+        "https://www.google.com.sg/maps/*",
+        "https://www.google.com.tr/maps/*",
+        "https://www.google.com.br/maps/*",
+        "https://www.google.com.mx/maps/*",
+        "https://www.google.com.ar/maps/*",
+        "https://www.google.co.za/maps/*"
+      ],
       "js": ["content.js"]
     }
   ]

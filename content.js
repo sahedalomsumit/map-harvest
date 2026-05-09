@@ -2,6 +2,38 @@ let scraping = false;
 let scrapedData = [];
 let seenKeys = new Set();
 let lastStatusText = "Ready";
+let currentSearchQuery = "map harvest";
+
+function getSearchQuery() {
+  try {
+    // 1. Try search box input
+    const searchInput = document.querySelector('input#searchboxinput, input[name="q"], input[aria-label*="Search"]');
+    if (searchInput && searchInput.value) {
+      return searchInput.value.trim();
+    }
+    
+    // 2. Try URL path /maps/search/QUERY/
+    const url = window.location.href;
+    const pathMatch = url.match(/\/maps\/search\/([^\/@?]+)/);
+    if (pathMatch && pathMatch[1]) {
+      return decodeURIComponent(pathMatch[1].replace(/\+/g, ' '));
+    }
+    
+    // 3. Try URL query param q=
+    const urlObj = new URL(url);
+    const qParam = urlObj.searchParams.get('q');
+    if (qParam) return qParam;
+    
+    // 4. Try page title (usually "Search query - Google Maps")
+    const title = document.title;
+    if (title && title.includes(' - Google Maps')) {
+      return title.replace(' - Google Maps', '').trim();
+    }
+  } catch (e) {
+    console.error("Error detecting search query:", e);
+  }
+  return "map harvest";
+}
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "START_SCRAPING") {
@@ -9,6 +41,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       scraping = true;
       scrapedData = [];
       seenKeys.clear();
+      currentSearchQuery = getSearchQuery();
       startHarvest();
     }
     sendResponse({ success: true });
@@ -35,12 +68,14 @@ async function startHarvest() {
   let allItems = [];
 
   while (scraping) {
-    allItems = document.querySelectorAll('a[href*="/maps/place/"]');
+    allItems = document.querySelectorAll('a[href*="/maps/place/"], a.hfpxzc');
     updateStatus(`Scrolling to load all results... (Found ${allItems.length})`);
     
     if (allItems.length > 0) {
       // Scroll the last item into view to trigger lazy loading
       allItems[allItems.length - 1].scrollIntoView({ block: 'end' });
+    } else if (noChangeCount > 5) {
+       updateStatus("No results found yet. Are you sure you are on a search results page?");
     }
     
     if (feedContainer) {
@@ -111,7 +146,7 @@ async function startHarvest() {
     let loaded = false;
     for (let wait = 0; wait < 20; wait++) { // Wait up to 5 seconds
       await sleep(250);
-      const titleEl = document.querySelector('h1.DUwDvf.lfPIob');
+      const titleEl = document.querySelector('h1.DUwDvf, h1[class*="title"], h1.lfPIob');
       if (titleEl && titleEl.innerText.trim() && titleEl.innerText.trim() !== lastCompany) {
         loaded = true;
         break;
@@ -163,10 +198,62 @@ async function startHarvest() {
 function stopHarvest() {
   scraping = false;
   updateStatus(`Harvest complete. Exporting ${scrapedData.length} items...`);
+  
+  // Sanitize and use the captured search query
+  const sanitizedQuery = currentSearchQuery.replace(/[\\\/:*?"<>|]/g, "");
+
   if (scrapedData.length > 0) {
-    chrome.runtime.sendMessage({ action: "EXPORT_CSV", data: scrapedData });
+    downloadCsv(scrapedData, `${sanitizedQuery} - map harvest.csv`);
   }
   chrome.runtime.sendMessage({ action: "SCRAPING_DONE" });
+}
+
+function downloadCsv(data, filename) {
+  const headers = [
+    "company", "phone", "website", "email", "reviews", 
+    "review_score", "instagram", "facebook", "linkedin"
+  ];
+  
+  const csvRows = [];
+
+  // Add headers
+  csvRows.push(headers.map(header => `"${header}"`).join(','));
+
+  // Add rows
+  for (const row of data) {
+    const values = headers.map(header => {
+      let val = row[header] === null || row[header] === undefined ? "" : String(row[header]);
+      
+      if (header === 'phone' && val) {
+        // Strip everything except numbers and +
+        val = val.replace(/[^\d+]/g, '');
+        // Prepend + if missing
+        if (!val.startsWith('+')) {
+          val = '+' + val;
+        }
+        // Use Excel CSV formula trick to force text parsing and avoid scientific notation
+        return `"=""${val}"""`;
+      }
+
+      // Escape quotes for normal fields
+      val = val.replace(/"/g, '""');
+      return `"${val}"`;
+    });
+    csvRows.push(values.join(','));
+  }
+
+  const csvString = csvRows.join('\n');
+  const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  
+  link.setAttribute("href", url);
+  link.setAttribute("download", filename);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 }
 
 function getFeedContainer() {
@@ -175,8 +262,24 @@ function getFeedContainer() {
     document.querySelector('div[role="feed"]'),
     document.querySelector('.ecceSd'),
     document.querySelector('.m6QErb.DxyBCb.kA9KIf.dS8AEf.ecceSd'),
-    document.querySelector('div[aria-label^="Results for"]')
+    document.querySelector('div[aria-label^="Results for"]'),
+    document.querySelector('.m6QErb[aria-label]'),
+    document.querySelector('div[id^="QA0Szd"]') // Top level container
   ];
+  
+  // Look for the scrollable container specifically
+  for (const container of possibleContainers) {
+    if (container && container.scrollHeight > container.clientHeight) {
+      return container;
+    }
+  }
+
+  // Fallback: search for any div with significant scroll height and role=feed or specific classes
+  const allScrollable = document.querySelectorAll('.m6QErb.dS8AEf');
+  for (const el of allScrollable) {
+    if (el.scrollHeight > el.clientHeight) return el;
+  }
+
   return possibleContainers.find(c => c !== null);
 }
 
@@ -187,7 +290,7 @@ function extractDetails() {
   };
 
   try {
-    const titleEl = document.querySelector('h1.DUwDvf.lfPIob');
+    const titleEl = document.querySelector('h1.DUwDvf, h1[class*="title"], h1.lfPIob');
     if (titleEl) data.company = titleEl.innerText.trim();
 
     const f7nice = document.querySelector('div.F7nice');
