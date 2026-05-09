@@ -1,4 +1,4 @@
-import { scrapeEmailsAndSocials } from './utils/emailScraper.js';
+importScripts('./utils/emailScraper.js');
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "FETCH_WEBSITE") {

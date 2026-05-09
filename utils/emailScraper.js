@@ -1,4 +1,4 @@
-export async function scrapeEmailsAndSocials(url) {
+async function scrapeEmailsAndSocials(url) {
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
