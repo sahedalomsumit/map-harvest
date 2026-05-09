@@ -1,8 +1,14 @@
 # Map Harvest 🗺️
 
+[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg?style=for-the-badge)](https://github.com/sahedalomsumit/map-harvest)
+[![Landing Page](https://img.shields.io/badge/Landing_Page-Live-emerald.svg?style=for-the-badge)](https://github.com/sahedalomsumit/map-harvest-web)
+
 > Map Harvest - Scrape Google Maps search results to CSV.
 
 Map Harvest is a lightweight, fully client-side Chrome Extension that scrapes Google Maps search results and exports the data directly into a cleanly formatted CSV file. No backend, no API keys, and no rate limits.
+
+> [!TIP]
+> Visit the [Map Harvest Web](https://github.com/sahedalomsumit/map-harvest-web) repository for the official landing page and documentation.
 
 ## ✨ Features
 
