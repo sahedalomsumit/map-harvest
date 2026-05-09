@@ -1,5 +1,7 @@
 # Map Harvest 🗺️
 
+> Map Harvest - Scrape Google Maps search results to CSV.
+
 Map Harvest is a lightweight, fully client-side Chrome Extension that scrapes Google Maps search results and exports the data directly into a cleanly formatted CSV file. No backend, no API keys, and no rate limits.
 
 ## ✨ Features
@@ -7,6 +9,7 @@ Map Harvest is a lightweight, fully client-side Chrome Extension that scrapes Go
 - **Automated Scraping**: Automatically scrolls through Google Maps search results, clicks each listing, and extracts the data.
 - **Deep Scraping**: Fetches the business's website in the background to extract email addresses and social media links (Facebook, Instagram, LinkedIn) while avoiding CORS issues.
 - **Robust Data Extraction**: Captures the business name, phone number (formatted as text for Excel), website URL, email, total reviews, review score, and social links.
+- **Smart Export Naming**: Automatically names the exported CSV file based on your search query for easy organization.
 - **Deduplication**: Automatically deduplicates listings by business name and phone number.
 - **100% Client-Side**: All scraping and CSV generation happens directly in your browser. No data is sent to external servers.
 - **Excel-Friendly CSV**: Phone numbers are automatically prepended with their country code (e.g., `+353...`) and formatted so that Excel reads them as text, preventing them from being converted into scientific notation.
@@ -14,6 +17,7 @@ Map Harvest is a lightweight, fully client-side Chrome Extension that scrapes Go
 ## 📦 Data Collected
 
 For every business listing, Map Harvest collects the following columns:
+
 1. `company` — The name of the business
 2. `phone` — The phone number (formatted with `+` and protected from scientific notation)
 3. `website` — The business website URL
@@ -61,4 +65,9 @@ Since this extension is not published on the Chrome Web Store, you'll need to lo
 ## 👨‍💻 Author
 
 **Sahed Alom Sumit**
+
 - Website: [sahedalomsumit.com](https://sahedalomsumit.com)
+
+---
+
+Built with ❤️ by [Sahed Alom Sumit](https://github.com/sahedalomsumit)
