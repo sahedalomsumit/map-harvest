@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Map Harvest",
   "version": "1.0.0",
-  "description": "Scrape Google Maps search results to CSV.",
+  "description": "The Ultimate Google Maps Scraper & Lead Generation Tool",
   "permissions": [
     "activeTab",
     "scripting",
