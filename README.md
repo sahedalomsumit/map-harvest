@@ -4,7 +4,7 @@
 [![Landing Page](https://img.shields.io/badge/Landing_Page-Live-emerald.svg?style=for-the-badge)](https://github.com/sahedalomsumit/map-harvest-web)
 
 <div align="center">
-  <img src="marquee-promo.png" alt="Map Harvest Promo" width="100%">
+  <img src="icon.png" alt="Map Harvest Icon" width="200px">
 </div>
 
 > Map Harvest - The Ultimate Google Maps Scraper & Lead Generation Tool
