@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Map Harvest",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "The Ultimate Google Maps Scraper & Lead Generation Tool",
   "permissions": [
     "activeTab"

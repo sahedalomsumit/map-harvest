@@ -17,12 +17,8 @@ export function exportToCsv(data, filename) {
       let val = row[header] === null || row[header] === undefined ? "" : String(row[header]);
       
       if (header === 'phone' && val) {
-        // Strip everything except numbers and +
-        val = val.replace(/[^\d+]/g, '');
-        // Prepend + if missing
-        if (!val.startsWith('+')) {
-          val = '+' + val;
-        }
+        // Strip non-digits and leading zeros (country code is removed during extraction)
+        val = val.replace(/[^\d]/g, '').replace(/^0+/, '');
         // Use Excel CSV formula trick to force text parsing and avoid scientific notation
         return `"=""${val}"""`;
       }
